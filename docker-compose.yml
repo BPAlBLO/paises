@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: paises
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app_network
+
+  backend:
+    build: .
+    container_name: flask_backend
+    environment:
+      DB_HOST: db
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_NAME: paises
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    networks:
+      - app_network
+
+  frontend:
+    image: nginx:alpine
+    container_name: nginx_frontend
+    volumes:
+      - ./frontend:/usr/share/nginx/html  # Mapea la carpeta frontend al contenedor
+    ports:
+      - "8080:80"  # Exponer el puerto 8080 para acceder a la aplicación frontend
+    depends_on:
+      - backend
+    networks:
+      - app_network
+
+volumes:
+  db_data:
+
+networks:
+  app_network:
+    driver: bridge
