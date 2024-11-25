@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Countries and Population</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Countries and Population</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Country</th>
+                <th>Population</th>
+            </tr>
+        </thead>
+        <tbody id="countries-table">
+            <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+    <div id="error-message" class="error"></div>
+
+    <script>
+        // Function to fetch and display countries
+        async function fetchCountries() {
+            try {
+                const response = await fetch('http://localhost:5000/countries');
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
+
+                const countries = await response.json();
+                const tableBody = document.getElementById('countries-table');
+
+                // Clear the table
+                tableBody.innerHTML = '';
+
+                // Populate the table with data
+                countries.forEach(country => {
+                    const row = document.createElement('tr');
+
+                    row.innerHTML = `
+                        <td>${country.id}</td>
+                        <td>${country.nombre}</td>
+                        <td>${country.poblacion.toLocaleString()}</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            } catch (error) {
+                // Display error message
+                document.getElementById('error-message').textContent =
+                    'Failed to fetch countries data. Please try again later.';
+                console.error(error);
+            }
+        }
+
+        // Call fetchCountries when the page loads
+        window.onload = fetchCountries;
+    </script>
+</body>
+
+</html>
